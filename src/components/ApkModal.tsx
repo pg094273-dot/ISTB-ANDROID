@@ -257,7 +257,7 @@ adb install -r app-release-signed.apk`;
               {/* Important AI Studio URL note */}
               {cleanTargetUrl.includes('ais-dev-') && (
                 <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 leading-relaxed">
-                  <strong>Importante para TV Box:</strong> estás viendo la URL privada de desarrollo (<code className="font-mono">ais-dev-...</code>). Para que tu TV Box o PWABuilder entren sin pedir inicio de sesión de Google, usa la <strong>URL pública compartida</strong> de la app (pulsando <em>Share App</em> en AI Studio) y pégala arriba.
+                  <strong>Importante para TV Box:</strong> estás viendo la URL privada de vista previa (<code className="font-mono">ais-dev-...</code>), que pide cuenta de Google. Para usarla en el TV Box o generar el APK en PWABuilder sin login, descarga el proyecto (botón <strong>Download / GitHub</strong> de AI Studio) y súbelo gratis a <strong>Render.com</strong> o <strong>Railway</strong> para obtener tu URL pública, o prueba si <em>Share App</em> te genera un enlace público.
                 </div>
               )}
 
@@ -404,7 +404,7 @@ adb install -r app-release-signed.apk`;
             <div className="space-y-4">
               {cleanTargetUrl.includes('ais-dev-') && (
                 <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs leading-relaxed">
-                  <strong>¿PWABuilder te marca errores en Manifest y Service Worker?</strong> Es porque la URL <code className="font-mono">ais-dev-...</code> es privada (pide inicio de sesión de Google) y PWABuilder no puede entrar. Primero pulsa <strong>Deploy / Publicar</strong> en AI Studio para obtener tu URL pública (sin login), pégala arriba y vuelve a pulsar <strong>Abrir PWABuilder</strong>.
+                  <strong>¿PWABuilder te marca errores en Manifest y Service Worker?</strong> La URL <code className="font-mono">ais-dev-...</code> es privada (pide inicio de sesión de Google) y PWABuilder no puede leerla. Si no te aparece el botón <em>Deploy</em>, descarga el proyecto desde AI Studio, publícalo gratis en <strong>Render.com</strong> (<code className="font-mono">npm install &amp;&amp; npm run build</code> / <code className="font-mono">npm start</code>), pega esa URL pública arriba y vuelve a pulsar <strong>Abrir PWABuilder</strong>.
                 </div>
               )}
 
@@ -457,8 +457,8 @@ adb install -r app-release-signed.apk`;
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <div className="bg-slate-950/50 p-3 rounded-xl border border-slate-800">
-                  <div className="font-bold text-slate-200 mb-1">1. Publica la App (Deploy)</div>
-                  <p className="text-slate-400">Despliega la app en AI Studio (o Vercel/Cloud Run) para tener una URL HTTPS pública sin login.</p>
+                  <div className="font-bold text-slate-200 mb-1">1. URL Pública (Render / Cloud Run)</div>
+                  <p className="text-slate-400">Descarga la app de AI Studio y súbela gratis a Render.com (o Railway) para obtener una URL HTTPS sin login.</p>
                 </div>
                 <div className="bg-slate-950/50 p-3 rounded-xl border border-slate-800">
                   <div className="font-bold text-slate-200 mb-1">2. Package for Stores</div>
