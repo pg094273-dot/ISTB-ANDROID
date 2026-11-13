@@ -1,0 +1,6 @@
+{
+  "name": "iSTB Android - IPTV Player & APK Builder",
+  "description": "Reproductor IPTV profesional para Android y web compatible con listas M3U, Xtream Codes y Stalker Middleware, con generación directa de APK y PWA instalable.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

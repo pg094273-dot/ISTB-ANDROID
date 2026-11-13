@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>iSTB Android – IPTV Player</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<style>
+:root{
+  --bg:#0f172a;
+  --surface:#1e293b;
+  --surface-elev:#27354d;
+  --primary:#3b82f6;
+  --primary-hover:#60a5fa;
+  --text:#f1f5f9;
+  --text-muted:#94a3b8;
+  --danger:#ef4444;
+  --success:#22c55e;
+  --border:#334155;
+  --radius:16px;
+  --shadow:0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg);color:var(--text);
+  overflow:hidden;
+}
+.app{display:flex;flex-direction:column;height:100vh;max-width:100%}
+header{
+  height:60px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:relative;z-index:20
+}
+header .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:-.5px}
+header .brand .dot{width:8px;height:8px;background:var(--success);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+.header-actions{display:flex;gap:8px}
+.icon-btn{
+  width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--surface-elev);
+  color:var(--text);display:grid;place-items:center;cursor:pointer;font-size:18px
+}
+.icon-btn:active{transform:scale(.92)}
+main{flex:1;overflow-y:auto;padding:16px;position:relative}
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px;margin-bottom:14px;box-shadow:var(--shadow)
+}
+.card h2{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h2 .chip{font-size:11px;padding:2px 8px;border-radius:10px;background:var(--primary);color:#fff;opacity:.9}
+.section-title{font-size:13px;font-weight:700;color:var(--text-muted);margin:16px 0 10px;text-transform:uppercase;letter-spacing:.5px}
+input,select{
+  width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:#0b1120;
+  color:var(--text);font-size:15px;margin-bottom:10px;outline:none
+}
+input:focus{border-color:var(--primary)}
+label{display:block;font-size:13px;color:var(--text-muted);margin-bottom:6px;font-weight:600}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{
+  width:100%;padding:12px;border-radius:12px;border:none;font-size:15px;font-weight:700;
+  cursor:pointer;background:var(--primary);color:#fff;margin-top:6px
+}
+.btn:active{transform:scale(.98)}
+.btn.secondary{background:var(--surface-elev);color:var(--text)}
+.btn.danger{background:var(--danger);color:#fff}
+.btn.small{padding:8px 14px;font-size:14px;width:auto}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.channels{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.channel{
+  background:var(--surface-elev);border:1px solid var(--border);border-radius:12px;overflow:hidden;
+  display:flex;flex-direction:column;cursor:pointer;position:relative;group:relative
+}
+.channel .thumb{width:100%;height:90px;background:#0b1120;display:grid;place-items:center;color:var(--text-muted);font-size:11px;overflow:hidden;position:relative}
+.channel .thumb img{width:100%;height:100%;object-fit:cover;display:none}
+.channel .thumb .logo{width:34px;height:34px;border-radius:8px;background:var(--primary);display:grid;place-items:center;font-weight:800;font-size:13px}
+.channel .info{padding:8px}
+.channel .name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.channel .cat{font-size:11px;color:var(--text-muted);margin-top:4px}
+.channel .star{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(15,23,42,.85);border:1px solid var(--border);color:var(--text-muted);display:grid;place-items:center;cursor:pointer;font-size:14px;z-index:3}
+.channel .star.on{color:#fbbf24;border-color:#fbbf24;background:#1c1911}
+.empty{text-align:center;padding:40px 16px;color:var(--text-muted)}
+.empty .big{font-size:44px;margin-bottom:10px}
+.portal-card{
+  display:flex;gap:12px;align-items:center;padding:14px;border-radius:14px;border:1px solid var(--border);
+  background:var(--surface);cursor:pointer;margin-bottom:10px
+}
+.portal-card:active{background:var(--surface-elev)}
+.portal-card .avatar{width:52px;height:52px;border-radius:12px;background:var(--primary);display:grid;place-items:center;font-weight:900;font-size:20px;color:#fff;flex-shrink:0}
+.portal-card .info{flex:1}
+.portal-card .name{font-weight:700;font-size:15px}
+.portal-card .type{font-size:12px;color:var(--text-muted);margin-top:2px}
+.portal-card .chev{font-size:20px;color:var(--text-muted)}
+
+/* Reproductor */
+.player{position:fixed;inset:0;background:#000;z-index:100;display:flex;flex-direction:column;display:none}
+.player video{width:100%;height:100%;background:#000;display:block}
+.player .controls{
+  position:absolute;inset:0;background:linear-gradient(transparent,rgba(0,0,0,.7));
+  display:flex;flex-direction:column;justify-content:flex-end;padding:22px;gap:10px;pointer-events:none
+}
+.player .top-bar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:12px;background:linear-gradient(transparent,rgba(0,0,0,.6));pointer-events:auto}
+.player .btn-row{display:flex;gap:10px;pointer-events:auto}
+.player .pip{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;cursor:pointer;font-size:14px;pointer-events:auto;z-index:5}
+.player .seek{width:100%;height:4px;background:rgba(255,255,255,.3);border-radius:2px;appearance:none;cursor:pointer;margin:6px 0}
+.player .seek::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--primary);border-radius:50%;cursor:pointer}
+.player .time{font-size:12px;color:rgba(255,255,255,.8);display:flex;justify-content:space-between}
+
+/* Multi view */
+.multi{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.multi .win{background:#000;border-radius:10px;overflow:hidden;position:relative}
+.multi .win video{width:100%;height:100%;object-fit:cover;display:block}
+.multi .win .label{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.6);color:#fff;padding:2px 8px;border-radius:6px;font-size:11px}
+
+/* Nav bottom */
+.nav{display:flex;background:var(--surface);border-top:1px solid var(--border);padding:8px 4px;gap:0;position:relative;z-index:30}
+.nav .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;color:var(--text-muted);text-decoration:none;font-size:11px;font-weight:700;border-radius:10px;min-width:60px}
+.nav .tab.active{color:var(--primary);background:rgba(59,130,246,.1)}
+.nav .tab .ic{font-size:20px}
+
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(2,6,23,.8);display:flex;align-items:center;justify-content:center;z-index:200;display:none;padding:16px}
+.modal .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:460px;max-height:90vh;overflow-y:auto;padding:20px;box-shadow:var(--shadow)}
+.modal h3{font-size:17px;margin-bottom:16px}
+.radio-group{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.radio{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:#0b1120;cursor:pointer}
+.radio input{width:0;height:0;opacity:0}
+.radio .mark{width:20px;height:20px;border:2px solid var(--border);border-radius:50%;flex-shrink:0}
+.radio.selected .mark{border-color:var(--primary);background:var(--primary);background-image:radial-circle(var(--primary),var(--primary))}
+.extra{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.hidden{display:none!important}
+.fade-in{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-thumb{background:#334155;border-radius:4px}
+@media(max-width:480px){.row{grid-template-columns:1fr}.multi{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><div class="dot"></div> iSTB Android</div>
+    <div class="header-actions">
+      <button class="icon-btn" id="btnSearch" title="Buscar">🔍</button>
+      <button class="icon-btn" id="btnAddPortal" title="Añadir portal">➕</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Inicio -->
+    <section id="view-home" class="fade-in">
+      <div class="section-title">Mis portales</div>
+      <div id="portalList" class="channels"></div>
+      <div class="empty" id="emptyHome" style="display:none">
+        <div class="big">📺</div>
+        <div>Aún no hay portales añadidos.</div>
+        <div style="margin-top:10px;color:var(--text-muted);font-size:13px">Añade una lista M3U, Xtream Codes o portal Stalker para empezar.</div>
+      </div>
+    </section>
+
+    <!-- Canales de un portal -->
+    <section id="view-portal" class="hidden fade-in">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <button class="icon-btn" onclick="show('view-home')">←</button>
+        <h2 id="portalTitle">Canales</h2>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input type="text" id="chSearch" placeholder="Buscar canales...">
+        <button class="btn small secondary" onclick="filterFavs()">⭐ Favoritos</button>
+      </div>
+      <div id="channelList" class="channels"></div>
+    </section>
+
+    <!-- Reproductor -->
+    <section id="view-player" class="player hidden">
+      <div class="top-bar">
+        <div id="playerChannelName" style="font-weight:700">Cargando...</div>
+        <button class="icon-btn" onclick="hidePlayer()">✕</button>
+      </div>
+      <div class="pip" id="btnPip" title="Picture-in-Picture">🖼️</div>
+      <video id="playerVideo" playsinline></video>
+      <div class="controls">
+        <div class="btn-row">
+          <button class="icon-btn" onclick="togglePlay()">▶/⏸</button>
+          <button class="icon-btn" onclick="toggleMute()">🔊</button>
+          <button class="icon-btn" onclick="toggleFullscreen()">⛶</button>
+        </div>
+        <input type="range" id="seek" class="seek" min="0" max="100" value="0">
+        <div class="time"><span id="curTime">0:00</span><span id="durTime">0:00</span></div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="nav">
+    <a class="tab active" onclick="show('view-home')"><span class="ic">🏠</span>Inicio</a>
+    <a class="tab" onclick="showPortals()"><span class="ic">📺</span>Portales</a>
+    <a class="tab" onclick="showFavs()"><span class="ic">⭐</span>Favoritos</a>
+    <a class="tab" onclick="showSettings()"><span class="ic">⚙️</span>Ajustes</a>
+  </nav>
+</div>
+
+<!-- Modal añadir portal -->
+<div class="modal" id="modalAdd">
+  <div class="panel">
+    <h3>➕ Añadir portal IPTV</h3>
+    <div class="radio-group">
+      <label class="radio"><input type="radio" name="ptype" value="m3u" checked><div class="mark"></div><b>Lista M3U</b><div style="font-size:12px;color:var(--text-muted)">URL directa de un archivo .m3u</div></label>
+      <label class="radio"><input type="radio" name="ptype" value="xtream"><div class="mark"></div><b>Xtream Codes</b><div style="font-size:12px;color:var(--text-muted)">Usuario, contraseña y URL del servidor</div></label>
+      <label class="radio"><input type="radio" name="ptype" value="stalker"><div class="mark"></div><b>Stalker Middleware (MAC)</b><div style="font-size:12px;color:var(--text-muted)">URL base y dirección MAC del dispositivo</div></label>
+    </div>
+    <div id="fields-m3u">
+      <label>Nombre del portal</label><input id="pName" placeholder="Ej. Mi lista IPTV">
+      <label>URL de la lista M3U</label><input id="pUrl" type="url" placeholder="https://ejemplo.com/lista.m3u">
+    </div>
+    <div id="fields-xtream" class="hidden">
+      <label>Nombre del portal</label><input id="xName" placeholder="Ej. Servidor Xtream">
+      <label>URL del servidor</label><input id="xUrl" type="url" placeholder="http://servidor.com:8080">
+      <label>Usuario</label><input id="xUser">
+      <label>Contraseña</label><input id="xPass">
+    </div>
+    <div id="fields-stalker" class="hidden">
+      <label>Nombre del portal</label><input id="sName" placeholder="Ej. Stalker Casa">
+      <label>URL base del portal</label><input id="sUrl" type="url" placeholder="http://portal.com/stalker_portal">
+      <label>Dirección MAC</label><input id="sMac" placeholder="00:1A:79:XX:XX:XX">
+    </div>
+    <div class="extra">
+      <button class="btn secondary" onclick="closeModal('modalAdd')">Cancelar</button>
+      <button class="btn" onclick="savePortal()">Guardar portal</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========== Estado ========== */
+let portals = JSON.parse(localStorage.getItem('istb_portals') || '[]');
+let favs = JSON.parse(localStorage.getItem('istb_favs') || '[]');
+let currentPortal = null;
+let currentChannel = null;
+let playerInterval = null;
+
+/* ========== Navegación ========== */
+function show(id){
+  document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));
+  document.querySelectorAll('.nav .tab').forEach(t=>t.classList.remove('active'));
+  const el=document.getElementById(id);
+  if(el) el.classList.remove('hidden');
+  const tab=document.querySelector(`.nav .tab[onclick*="${id}"]`);
+  if(tab) tab.classList.add('active');
+}
+function hidePlayer(){
+  show('view-portal');
+  const v=document.getElementById('playerVideo');
+  v.pause(); v.src='';
+  document.getElementById('view-player').classList.add('hidden');
+  clearInterval(playerInterval);
+}
+
+/* ========== Portales ========== */
+function savePortals(){ localStorage.setItem('istb_portals',JSON.stringify(portals)); renderHome(); }
+function renderHome(){
+  const list=document.getElementById('portalList');
+  const empty=document.getElementById('emptyHome');
+  list.innerHTML='';
+  if(portals.length===0){ empty.style.display='block'; return; }
+  empty.style.display='none';
+  portals.forEach((p,i)=>{
+    const div=document.createElement('div');
+    div.className='portal-card';
+    div.onclick=()=>openPortal(i);
+    const initial=p.name.charAt(0).toUpperCase();
+    div.innerHTML=`
+      <div class="avatar">${initial}</div>
+      <div class="info"><div class="name">${escapeHtml(p.name)}</div><div class="type">${p.type.toUpperCase()} • ${p.channels||0} canales</div></div>
+      <div class="chev">›</div>
+    `;
+    list.appendChild(div);
+  });
+}
+function showPortals(){ show('view-home'); }
+function showFavs(){
+  show('view-home');
+  const list=document.getElementById('portalList');
+  const empty=document.getElementById('emptyHome');
+  const favPortals = portals.filter(p=> favs.some(f=>f.portalId===p.id));
+  list.innerHTML='';
+  if(favPortals.length===0){ empty.style.display='block'; empty.querySelector('div').textContent='⭐'; empty.children[1].textContent='Sin favoritos aún'; return; }
+  empty.style.display='none';
+  favPortals.forEach((p,i)=>{
+    const div=document.createElement('div');
+    div.className='portal-card';
+    div.onclick=()=>openPortal(portals.findIndex(x=>x.id===p.id));
+    div.innerHTML=`
+      <div class="avatar">⭐</div>
+      <div class="info"><div class="name">${escapeHtml(p.name)}</div><div class="type">${p.type.toUpperCase()} • ${p.channels||0} canales</div></div>
+      <div class="chev">›</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+/* Abrir portal y cargar canales */
+function openPortal(idx){
+  currentPortal = portals[idx];
+  document.getElementById('portalTitle').textContent = currentPortal.name;
+  document.getElementById('chSearch').value='';
+  document.getElementById('channelList').innerHTML='<div class="empty"><div class="big">⏳</div><div>Cargando canales...</div></div>';
+  show('view-portal');
+  loadChannels(currentPortal);
+}
+
+async function loadChannels(p){
+  try{
+    let channels = [];
+    if(p.type==='m3u') channels = await loadM3U(p.url);
+    else if(p.type==='xtream') channels = await loadXtream(p);
+    else if(p.type==='stalker') channels = await loadStalker(p);
+    p.channels = channels.length;
+    savePortals();
+    renderChannels(channels);
+  }catch(e){
+    document.getElementById('channelList').innerHTML = `<div class="empty"><div class="big">⚠️</div><div>${escapeHtml(e.message)}</div></div>`;
+  }
+}
+
+function renderChannels(channels, filter=''){
+  const list=document.getElementById('channelList');
+  list.innerHTML='';
+  const filtered = channels.filter(c=>
+    c.name.toLowerCase().includes(filter.toLowerCase()) ||
+    (c.category||'').toLowerCase().includes(filter.toLowerCase())
+  );
+  if(filtered.length===0){ list.innerHTML='<div class="empty"><div class="big">🔍</div><div>No se encontraron canales</div></div>'; return; }
+  filtered.forEach(c=>{
+    const isFav = favs.some(f=>f.channelId===c.id);
+    const div=document.createElement('div');
+    div.className='channel';
+    div.onclick=(e)=>{ if(!e.target.classList.contains('star')) playChannel(c); };
+    div.innerHTML=`
+      <div class="thumb">${c.logo?`<img src="${escapeHtml(c.logo)}" onerror="this.style.display='none';this.parentElement.querySelector('.logo').style.display='grid'">`:`<div class="logo">${c.name.charAt(0).toUpperCase()}</div>`}</div>
+      <div class="info"><div class="name">${escapeHtml(c.name)}</div><div class="cat">${escapeHtml(c.category||'General')}</div></div>
+      <div class="star ${isFav?'on':''}" onclick="ev=>{ev.stopPropagation();toggleFav(c)}">☆</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+document.getElementById('chSearch').addEventListener('input',(e)=>{
+  renderChannels(currentPortal.channels||[], e.target.value);
+});
+
+function toggleFav(channel){
+  const idx=favs.findIndex(f=>f.channelId===channel.id);
+  if(idx>=0) favs.splice(idx,1);
+  else favs.push({channelId:channel.id, portalId:currentPortal.id, name:channel.name, logo:channel.logo, url:channel.url});
+  localStorage.setItem('istb_favs',JSON.stringify(favs));
+  renderChannels(currentPortal.channels||[], document.getElementById('chSearch').value);
+}
+
+/* ========== Carga de listas ========== */
+async function loadM3U(url){
+  const res = await fetch(url, {cache:'no-store'});
+  if(!res.ok) throw new Error('No se pudo descargar la lista M3U');
+  const text = await res.text();
+  return parseM3U(text);
+}
+
+function parseM3U(text){
+  const lines = text.split('\n');
+  const channels=[];
+  let current={};
+  for(const line of lines){
+    const l=line.trim();
+    if(l.startsWith('#EXTINF:')){
+      const info = l.substring(l.indexOf(',')+1).trim();
+      const group = l.match(/group-title="([^"]*)"/);
+      const tvg = l.match(/tvg-logo="([^"]*)"/);
+      current = { name: info || 'Canal', category: group?group[1]:'General', logo: tvg?tvg[1]:'', id:'c'+Math.random().toString(36).slice(2) };
+    }else if(l && !l.startsWith('#') && current.name){
+      channels.push({...current, url: l.trim() });
+      current={};
+    }
+  }
+  return channels;
+}
+
+async function loadXtream(p){
+  const base = p.url.replace(/\/$/,'');
+  const login = await fetch(`${base}/player_api.php?username=${encodeURIComponent(p.user)}&password=${encodeURIComponent(p.pass)}`,{cache:'no-store'});
+  if(!login.ok) throw new Error('Error de autenticación Xtream');
+  const data = await login.json();
+  if(!data.user_info) throw new Error('Credenciales inválidas');
+  // Obtener categorías y streams
+  const catRes = await fetch(`${base}/player_api.php?username=${encodeURIComponent(p.user)}&password=${encodeURIComponent(p.pass)}&action=get_live_categories`,{cache:'no-store'});
+  const cats = await catRes.json();
+  const streamRes = await fetch(`${base}/player_api.php?username=${encodeURIComponent(p.user)}&password=${encodeURIComponent(p.pass)}&action=get_live_streams`,{cache:'no-store'});
+  const streams = await streamRes.json();
+  return streams.map(s=>({
+    id:'x'+s.stream_id,
+    name: s.name || 'Canal',
+    category: s.category_name || 'General',
+    logo: s.stream_icon || '',
+    url: `${base}/live/${p.user}/${p.pass}/${s.stream_id}.ts`
+  }));
+}
+
+async function loadStalker(p){
+  // Stalker Middleware requiere autenticación por MAC; versión simplificada
+  const base = p.url.replace(/\/$/,'');
+  const res = await fetch(`${base}/server/load.php?type=stb&action=handshake&mac=${encodeURIComponent(p.mac)}`,{cache:'no-store'});
+  if(!res.ok) throw new Error('No se pudo contactar el portal Stalker');
+  const data = await res.json();
+  const js = data.js || '';
+  const tokenMatch = js.match(/var token = "([^"]+)"/);
+  const token = tokenMatch?tokenMatch[1]:'';
+  const listRes = await fetch(`${base}/server/load.php?type=itv&action=get_all_channels&mac=${encodeURIComponent(p.mac)}&token=${token}`,{cache:'no-store'});
+  const list = await listRes.json();
+  return (list.data||[]).map(c=>({
+    id:'s'+c.id,
+    name: c.name || 'Canal',
+    category: c.category || 'General',
+    logo: c.picon || '',
+    url: c.url || ''
+  }));
+}
+
+/* ========== Reproductor ========== */
+async function playChannel(c){
+  currentChannel = c;
+  document.getElementById('playerChannelName').textContent = c.name;
+  document.getElementById('view-portal').classList.add('hidden');
+  const player=document.getElementById('view-player');
+  player.classList.remove('hidden');
+  const v=document.getElementById('playerVideo');
+  v.src = c.url;
+  v.play().catch(()=>{});
+  setupPlayer(v);
+}
+
+function setupPlayer(v){
+  clearInterval(playerInterval);
+  playerInterval=setInterval(()=>{
+    if(v.duration){
+      document.getElementById('curTime').textContent = fmtTime(v.currentTime);
+      document.getElementById('durTime').textContent = fmtTime(v.duration);
+    }
+  },500);
+  v.onloadedmetadata=()=>{
+    document.getElementById('durTime').textContent=fmtTime(v.duration);
+  };
+}
+function togglePlay(){
+  const v=document.getElementById('playerVideo');
+  if(v.paused) v.play(); else v.pause();
+}
+function toggleMute(){
+  const v=document.getElementById('playerVideo');
+  v.muted=!v.muted;
+}
+function toggleFullscreen(){
+  const v=document.getElementById('playerVideo');
+  if(v.requestFullscreen) v.requestFullscreen();
+  else if(v.webkitRequestFullscreen) v.webkitRequestFullscreen();
+}
+async function pipToggle(){
+  const v=document.getElementById('playerVideo');
+  if(document.pictureInPictureElement){
+    await document.exitPictureInPicture();
+  }else if(v.requestPictureInPicture){
+    await v.requestPictureInPicture();
+  }
+}
+document.getElementById('btnPip').onclick=pipToggle;
+document.getElementById('seek').addEventListener('input',(e)=>{
+  const v=document.getElementById('playerVideo');
+  v.currentTime = (e.target.value/100)*v.duration;
+});
+function fmtTime(t){
+  if(!t||isNaN(t)) return '0:00';
+  const m=Math.floor(t/60), s=Math.floor(t%60);
+  return m+':'+(s<10?'0':'')+s;
+}
+
+/* ========== Añadir portal modal ========== */
+document.getElementById('btnAddPortal').onclick=()=>{
+  document.getElementById('modalAdd').classList.remove('hidden');
+  document.getElementById('pTypeM3u').checked=true;
+  switchFields('m3u');
+};
+function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
+document.querySelectorAll('input[name="ptype"]').forEach(r=>{
+  r.addEventListener('change',()=>switchFields(r.value));
+});
+function switchFields(t){
+  ['m3u','xtream','stalker'].forEach(k=>{
+    document.getElementById('fields-'+k).classList.toggle('hidden', k!==t);
+  });
+}
+async function savePortal(){
+  const t = document.querySelector('input[name="ptype"]:checked').value;
+  let portal;
+  if(t==='m3u'){
+    const name=document.getElementById('pName').value.trim();
+    const url=document.getElementById('pUrl').value.trim();
+    if(!name||!url) return alert('Completa nombre y URL');
+    portal={id:'p'+Date.now(),name,type:'m3u',url,channels:0};
+  }else if(t==='xtream'){
+    const name=document.getElementById('xName').value.trim();
+    const url=document.getElementById('xUrl').value.trim();
+    const user=document.getElementById('xUser').value.trim();
+    const pass=document.getElementById('xPass').value.trim();
+    if(!name||!url||!user||!pass) return alert('Completa todos los campos');
+    portal={id:'p'+Date.now(),name,type:'xtream',url,user,pass,channels:0};
+  }else{
+    const name=document.getElementById('sName').value.trim();
+    const url=document.getElementById('sUrl').value.trim();
+    const mac=document.getElementById('sMac').value.trim();
+    if(!name||!url||!mac) return alert('Completa nombre, URL y MAC');
+    portal={id:'p'+Date.now(),name,type:'stalker',url,mac,channels:0};
+  }
+  portals.push(portal);
+  savePortals();
+  closeModal('modalAdd');
+  // limpiar form
+  document.getElementById('pName').value=''; document.getElementById('pUrl').value='';
+  document.getElementById('xName').value=''; document.getElementById('xUrl').value=''; document.getElementById('xUser').value=''; document.getElementById('xPass').value='';
+  document.getElementById('sName').value=''; document.getElementById('sUrl').value=''; document.getElementById('sMac').value='';
+}
+
+/* ========== Ajustes ========== */
+function showSettings(){
+  show('view-home'); // reutilizamos home como settings simple
+  const list=document.getElementById('portalList');
+  const empty=document.getElementById('emptyHome');
+  list.innerHTML=`
+    <div class="card">
+      <div class="section-title">Ajustes</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+        <span>Tema oscuro</span><div class="icon-btn">🌙</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+        <span>Reproducir en segundo plano</span><div class="icon-btn">▶‖</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
+        <span>Borrar portales y favoritos</span><button class="btn danger small" onclick="resetAll()">Resetear</button>
+      </div>
+    </div>
+    <div class="section-title" style="margin-top:20px">Sobre iSTB Android</div>
+    <div style="color:var(--text-muted);font-size:13px">Copia PWA de iSTB para Android. Soporta M3U, Xtream Codes y Stalker Middleware. No aloja contenido propio.</div>
+  `;
+  empty.style.display='none';
+}
+function resetAll(){
+  if(!confirm('¿Borrar todos los portales y favoritos?')) return;
+  portals=[]; favs=[]; localStorage.removeItem('istb_portals'); localStorage.removeItem('istb_favs');
+  savePortals();
+}
+
+/* ========== Inicialización ========== */
+renderHome();
+document.getElementById('btnSearch').onclick=()=>{
+  const q=prompt('Buscar canal por nombre:');
+  if(!q) return;
+  if(!currentPortal){ alert('Selecciona un portal primero'); return; }
+  document.getElementById('chSearch').value=q;
+  renderChannels(currentPortal.channels||[], q);
+};
+</script>
+</body></html>
